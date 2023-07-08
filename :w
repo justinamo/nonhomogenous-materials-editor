@@ -1,0 +1,49 @@
+var view = document.getElementById("view");
+var viewHeight = 800; 
+var viewWidth = null; 
+
+var viewsizer = document.getElementById("viewsizer");
+var viewsizerDragged = false; 
+viewsizer.addEventListener("dragstart", (event) => {
+  console.log("drag start");
+  viewsizerDragged = true;
+});
+viewsizer.addEventListener("dragend", (event) => {
+  console.log("drag end");
+  viewsizerDragged = false;
+});
+
+window.addEventListener("dragover", (event) => {
+  console.log("dragover", event.x, event.y, view.style.width);
+  if (viewsizerDragged) { 
+    viewWidth = event.x - 50
+    viewHeight = event.y - 50
+  };
+});
+
+function updateViewSize() {
+  view.style.width = viewWidth + "px";
+  view.style.height = viewHeight + "px";
+}
+
+canvas = document.getElementById("canvas");
+canvas.style.height = view.style.height
+canvas.style.width = view.style.width
+
+function drawGrid() {
+  if (canvas.getContext) {
+    const ctx = canvas.getContext("2d");
+    ctx.beginPath();
+    for (let i = 1; i <= 3; i++) {
+      ctx.moveTo(50 * i + 20, 0 + 20); 
+      ctx.lineTo(50 * i + 20, 200 + 20);
+
+      ctx.moveTo(0 + 20, 50 * i + 20); 
+      ctx.lineTo(200 + 20, 50 * i + 20);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
+
+drawGrid();
