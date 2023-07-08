@@ -1,0 +1,23 @@
+.view { 
+  border: 1px solid black;  
+  height: 800px;
+  width: 1000px; 
+  position: relative;
+  margin: 50px; 
+}
+
+#canvas { 
+  position: absolute;
+  top: -40px; 
+  left: -40px; 
+}
+
+.draggable {
+  height: 6px; 
+  width: 6px; 
+  position: absolute;
+  bottom: -4px; 
+  right: -4px;
+  border: 1px solid black; 
+  background: white;
+}
