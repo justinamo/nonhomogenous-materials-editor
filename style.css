@@ -21,3 +21,7 @@
   border: 1px solid black; 
   background: white;
 }
+
+#width-input, #height-input { 
+  width: 75px; 
+}
