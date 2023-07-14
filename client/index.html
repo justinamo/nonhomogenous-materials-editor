@@ -11,13 +11,16 @@
 	<span>Upload photo of plate</span>
 	<input type="file" id="photo-input"></input>
 	<span>plate width in inches:</span>
-	<input type="text" id="width-input"></input>
+	<input type="text" class="text-input" id="width-input"></input>
 	<span>plate height in inches:</span>
-	<input type="text" id="height-input"></input>
+	<input type="text" class="text-input" id="height-input"></input>
       </div>
       <div>
 	<span>Upload laser cut svg</span> 
 	<input type="file" id="svg-input"></input>
+	<span>viewBox units per inch:</span>
+	<input type="text" class="text-input" id="vupi-input"></input>
+	<div id="viewbox">viewBox: [min-x] [min-y] [width] [height]</div>
       </div>
     </header> 
     <div class="view" id="view">

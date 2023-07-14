@@ -22,6 +22,6 @@
   background: white;
 }
 
-#width-input, #height-input { 
+.text-input { 
   width: 75px; 
 }
