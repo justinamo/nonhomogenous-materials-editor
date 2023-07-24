@@ -30,9 +30,9 @@ def svg():
     request.files['svg'].save("output.svg", overwrite=True)
 
     paths, viewbox = read_svg("output.svg")
-    consolidate_to_grouped(paths).write_svg(filename="consolidated_paths.svg")
+    consolidate_to_grouped(paths).write_svg(filename="consolidated_paths.svg", viewbox=viewbox)
 
-    for_client = open("consolidated_paths.png", mode="rb") 
+    for_client = open("consolidated_paths.svg", mode="rb") 
     response.set_header('Access-Control-Allow-Origin', '*')
     return for_client
 

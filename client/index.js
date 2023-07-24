@@ -150,16 +150,6 @@ function startup() {
     draw(); 
   });
 
-  var svgReader = new FileReader(); 
-  svgReader.addEventListener("load", (event) => {
-    var svgText = svgReader.result; 
-    var parser = new DOMParser(); 
-    var svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-    var viewBox = svgDoc.querySelector("svg").getAttribute("viewBox"); 
-    document.getElementById("viewbox").innerText = "viewBox: " + viewBox; 
-    svgData = svgDoc; 
-  });
-
   function processPlateResponse(response) {
     return response; 
   };
@@ -178,20 +168,19 @@ function startup() {
   var header = document.querySelector("header");
   function processSvgResponse(response) { 
     var blob = response.blob().then((blob) => {
-      var url = URL.createObjectURL(blob); 
-      var image = new Image(); 
-      image.src = url;
-
-      return createImageBitmap(blob); 
-
-    }).then((bmp) => {
-      var { width, height } = bmp; 
-      bmp.close(); 
+      return blob.text();
+    }).then((text) => {
+      var parser = new DOMParser(); 
+      var svgDoc = parser.parseFromString(text, "image/svg+xml");
+      svgData = svgDoc; 
+      var viewBox = svgDoc.querySelector("svg").getAttribute("viewBox"); 
+      document.getElementById("viewbox").innerText = "viewBox: " + viewBox; 
+      var width = viewBox.split(" ")[2];
+      var height = viewBox.split(" ")[3];
       svgWidthInInches = width / document.getElementById("vupi-input").value;
       svgHeightInInches = height / document.getElementById("vupi-input").value;
       getIntersection();
       draw();
-
       document.getElementById("loading-svg").style.display = "none";
     }); 
   };
@@ -212,7 +201,6 @@ function startup() {
       } else {
 	formData.append("viewBoxUnitsPerInch", parseFloat(vupi));
 	upload(formData, "svg", processSvgResponse)
-	svgReader.readAsText(svgFile);
       };
       
     };
