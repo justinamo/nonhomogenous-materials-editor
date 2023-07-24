@@ -77,14 +77,9 @@ def intersection():
     interHPx = min(svgHeightPx, plateHeightPx)
     plate_size_svg_png = np.ones_like(plate)
 
-    print(svgStartXIn, svgStartYIn)
     svg_x = math.floor(svgStartXIn * plateWidthPx / plateWidthIn) 
     svg_y = math.floor(svgStartYIn * plateHeightPx / plateHeightIn) 
 
-    print(svg_y, svg_x) 
-    print(plate_size_svg_png[svg_y:interHPx, svg_x:interWPx].shape)
-    print(svg_png[0:interHPx-svg_y, 0:interWPx-svg_x].shape)
-    
     if svg_y < 0 and svg_x < 0:
         plate_size_svg_png[0:interHPx+svg_y, 0:interWPx+svg_x] = svg_png[-svg_y:interHPx, -svg_x:interWPx]
     elif svg_y >= 0 and svg_x < 0: 
