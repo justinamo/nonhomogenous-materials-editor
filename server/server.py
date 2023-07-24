@@ -1,6 +1,6 @@
 import numpy as np
 import cv2, cairosvg, image_processor, math, svgpathtools
-from EnhancedPath import read_svg
+from EnhancedPath import *
 from bottle import route, run, response, request, static_file
 
 plate_path = "plate.jpg"
@@ -28,15 +28,11 @@ def svg():
 @route('/svg', method="PUT")
 def svg():
     request.files['svg'].save("output.svg", overwrite=True)
-    vupi = request.forms['viewBoxUnitsPerInch']
-    plate = cv2.imread(plate_path)
-    height = plate.shape[0]
-    width = plate.shape[1]
-    
-    cairosvg.svg2png(url="output.svg", write_to="for_client.png")
 
-    for_client = open("for_client.png", mode="rb") 
+    paths, viewbox = read_svg("output.svg")
+    consolidate_to_grouped(paths).write_svg(filename="consolidated_paths.svg")
 
+    for_client = open("consolidated_paths.png", mode="rb") 
     response.set_header('Access-Control-Allow-Origin', '*')
     return for_client
 
