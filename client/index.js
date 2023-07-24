@@ -78,7 +78,7 @@ function startup() {
     y = event.offsetY - canvasOffset;
     pointerOnSvg = svgData && 
       ( originOffsetX + svgOffsetX < x && x < originOffsetX + svgOffsetY + svgWidthPx &&
-	originOffsetY + svgOffsetX < y && y < originOffsetY + svgOffsetY + svgHeightPx
+	originOffsetY + svgOffsetY < y && y < originOffsetY + svgOffsetY + svgHeightPx
       );
     if (pointerOnSvg) {
       console.log("pointer on svg");
@@ -188,7 +188,7 @@ function startup() {
   var svgInput = document.getElementById("svg-input"); 
   svgInput.addEventListener("change", (event) => {
     if (svgInput.files && svgInput.files[0]) { 
-      document.getElementById("loading-svg").style.display = "block";
+      document.getElementById("loading-svg").style.display = "inline";
       var svgFile = svgInput.files[0]; 
 
       var formData = new FormData(); 
