@@ -1,5 +1,6 @@
 import numpy as np
-import cv2, cairosvg, image_processor, math
+import cv2, cairosvg, image_processor, math, svgpathtools
+from EnhancedPath import read_svg
 from bottle import route, run, response, request, static_file
 
 plate_path = "plate.jpg"

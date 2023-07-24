@@ -9,6 +9,7 @@
     <header>
       <div>
 	<span>Upload photo of plate</span>
+	<img src="loading.gif" class="loading" id="loading-plate"/>
 	<input type="file" id="photo-input"></input>
 	<span>plate width in inches:</span>
 	<input type="text" class="text-input" id="width-input"></input>
@@ -17,6 +18,7 @@
       </div>
       <div>
 	<span>Upload laser cut svg</span> 
+	<img src="loading.gif" class="loading" id="loading-svg"/>
 	<input type="file" id="svg-input"></input>
 	<span>viewBox units per inch:</span>
 	<input type="text" class="text-input" id="vupi-input"></input>
@@ -27,6 +29,7 @@
       <canvas id="canvas"></canvas>
       <div class="draggable" id="viewsizer"></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/svg-path-commander/dist/svg-path-commander.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

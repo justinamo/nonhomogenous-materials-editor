@@ -53,6 +53,9 @@ function processIntersectionResponse(response) {
     var image = new Image(); 
     image.src = url; 
     intersectionData = image; 
+
+    clearCanvas(); 
+    draw();
   });
 };
 
@@ -153,8 +156,8 @@ function startup() {
     var parser = new DOMParser(); 
     var svgDoc = parser.parseFromString(svgText, "image/svg+xml");
     var viewBox = svgDoc.querySelector("svg").getAttribute("viewBox"); 
-    console.log(viewBox);
     document.getElementById("viewbox").innerText = "viewBox: " + viewBox; 
+    svgData = svgDoc; 
   });
 
   function processPlateResponse(response) {
@@ -178,7 +181,6 @@ function startup() {
       var url = URL.createObjectURL(blob); 
       var image = new Image(); 
       image.src = url;
-      svgData = image; 
 
       return createImageBitmap(blob); 
 
@@ -189,12 +191,15 @@ function startup() {
       svgHeightInInches = height / document.getElementById("vupi-input").value;
       getIntersection();
       draw();
+
+      document.getElementById("loading-svg").style.display = "none";
     }); 
   };
 
   var svgInput = document.getElementById("svg-input"); 
   svgInput.addEventListener("change", (event) => {
     if (svgInput.files && svgInput.files[0]) { 
+      document.getElementById("loading-svg").style.display = "block";
       var svgFile = svgInput.files[0]; 
 
       var formData = new FormData(); 
@@ -273,8 +278,26 @@ function drawGrid(cellSize, inchesPerCell) {
   };
 };
 
-function drawImage(ctx, offsetX, offsetY, imageData, imageWidthInInches, imageHeightInInches, 
-  strokeStyle, lineDash, drawRect=true) { 
+function drawRect(ctx, dx, dy, dWidth, dHeight, offsetX, offsetY, strokeStyle, lineDash) { 
+  rx = Math.min(dx, canvasOffset + viewWidth); 
+  ry = Math.min(dy, canvasOffset + viewHeight); 
+  rectWidth = Math.max(Math.min(dWidth, gridWidth + offsetX), 0);
+  rectHeight = Math.max(Math.min(dHeight, gridHeight + offsetY), 0);
+  ctx.beginPath();
+  ctx.rect(rx, ry, rectWidth, rectHeight);
+  ctx.strokeStyle = strokeStyle;
+  if (lineDash) { 
+    ctx.setLineDash(lineDash);
+  };
+  ctx.stroke();
+  ctx.closePath();
+};
+
+function inToGridCoordUnits(n_inches) {
+  return n_inches / inchesPerGridCell * gridCellSize;
+};
+
+function drawImage(ctx, offsetX, offsetY, imageData, imageWidthInInches, imageHeightInInches, draw=true) { 
   dx = Math.max(offsetX + canvasOffset, canvasOffset); 
   dy = Math.max(offsetY + canvasOffset, canvasOffset); 
   gridWidth = imageWidthInInches / inchesPerGridCell * gridCellSize; 
@@ -285,71 +308,48 @@ function drawImage(ctx, offsetX, offsetY, imageData, imageWidthInInches, imageHe
   sHeight = Math.min(gridHeight, viewHeight + canvasOffset - dy) * imageData.height / gridHeight;
   dWidth = Math.min(gridWidth, viewWidth + canvasOffset - dx);
   dHeight = Math.min(gridHeight, viewHeight + canvasOffset - dy);
-
-  ctx.drawImage(imageData, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight); 
-  
-  if (drawRect) { 
-    rx = Math.min(dx, canvasOffset + viewWidth); 
-    ry = Math.min(dy, canvasOffset + viewHeight); 
-    rectWidth = Math.max(Math.min(dWidth, gridWidth + offsetX), 0);
-    rectHeight = Math.max(Math.min(dHeight, gridHeight + offsetY), 0);
-    ctx.beginPath();
-    ctx.rect(rx, ry, rectWidth, rectHeight);
-    ctx.strokeStyle = strokeStyle;
-    if (lineDash) { 
-      ctx.setLineDash(lineDash);
-    };
-    ctx.stroke();
-    ctx.closePath();
+  if (draw) {
+    ctx.drawImage(imageData, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight); 
   };
+
+  return { dx, dy, dWidth, dHeight }
 };
 
 function drawPlate() { 
   if (canvas.getContext && plateData) {
     const ctx = canvas.getContext("2d");
-    drawImage(
-      ctx, 
-      originOffsetX,
-      originOffsetY, 
-      plateData, 
-      plateWidthInInches, 
-      plateHeightInInches, 
-      "black", 
-      []
-    ); 
+    offsetX = originOffsetX;
+    offsetY = originOffsetY; 
+    d = drawImage(ctx, offsetX, offsetY, plateData, plateWidthInInches, plateHeightInInches); 
+    drawRect(ctx, d.dx, d.dy, d.dWidth, d.dHeight, offsetX, offsetY, "black", []);
   };
 };
 
 function drawSvg() { 
   if (canvas.getContext && svgData) { 
     const ctx = canvas.getContext("2d");
-    drawImage(
-      ctx, 
-      svgOffsetX + originOffsetX,
-      svgOffsetY + originOffsetY, 
-      svgData, 
-      svgWidthInInches, 
-      svgHeightInInches, 
-      "gray",
-      [5]
-    );
+    offsetX = svgOffsetX + originOffsetX;
+    offsetY = svgOffsetY + originOffsetY;
+    ctx.translate(offsetX + canvasOffset, offsetY + canvasOffset); 
+    var vupi = document.getElementById("vupi-input").value;
+    var scaleFactor = 1 / vupi * (gridCellSize / inchesPerGridCell);
+    ctx.scale(scaleFactor, scaleFactor); 
+    ctx.strokeStyle = "black"; 
+    ctx.strokeWidth = 1;
+    svgData.querySelectorAll("path").forEach((path) => {
+      path2d = new Path2D(path.getAttribute("d")); 
+      ctx.stroke(path2d); 
+    });
+    ctx.resetTransform(); 
+    d = drawImage(ctx, offsetX, offsetY, svgData, svgWidthInInches, svgHeightInInches, false);
+    drawRect(ctx, d.dx, d.dy, d.dWidth, d.dHeight, offsetX, offsetY, "gray", [5]);
   };
 };
 
 function drawIntersection() { 
   if (canvas.getContext && intersectionData) {
     const ctx = canvas.getContext("2d");
-    drawImage(
-      ctx, 
-      originOffsetX,
-      originOffsetY, 
-      intersectionData,
-      plateWidthInInches,
-      plateHeightInInches,
-      "black", 
-      [], 
-      false
-    ); 
+    drawImage(ctx, originOffsetX, originOffsetY, intersectionData, plateWidthInInches, plateHeightInInches);
   };
 };
 

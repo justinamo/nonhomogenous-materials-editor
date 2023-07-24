@@ -22,6 +22,11 @@
   background: white;
 }
 
+.loading {
+  height: 1rem; 
+  display: none; 
+}
+
 .text-input { 
   width: 75px; 
 }
