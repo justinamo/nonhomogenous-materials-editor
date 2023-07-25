@@ -1,3 +1,5 @@
 *.swp
 *.png
 *.jpg
+*.svg
+/server/__pycache__/

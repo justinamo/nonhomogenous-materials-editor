@@ -73,12 +73,11 @@ def intersection():
 
     raw_svg_png = cv2.imread("for_comparison.png", cv2.IMREAD_UNCHANGED)
     svg_png = raw_svg_png[:, :, 3] == 0
-    interWPx = min(svgWidthPx, plateWidthPx)
-    interHPx = min(svgHeightPx, plateHeightPx)
-    plate_size_svg_png = np.ones_like(plate)
-
     svg_x = math.floor(svgStartXIn * plateWidthPx / plateWidthIn) 
     svg_y = math.floor(svgStartYIn * plateHeightPx / plateHeightIn) 
+    interWPx = min(svg_x + svgWidthPx, plateWidthPx)
+    interHPx = min(svg_y + svgHeightPx, plateHeightPx)
+    plate_size_svg_png = np.ones_like(plate)
 
     if svg_y < 0 and svg_x < 0:
         plate_size_svg_png[0:interHPx+svg_y, 0:interWPx+svg_x] = svg_png[-svg_y:interHPx, -svg_x:interWPx]
@@ -89,10 +88,11 @@ def intersection():
     elif svg_y >= 0 and svg_x >= 0: 
         plate_size_svg_png[svg_y:interHPx, svg_x:interWPx] = svg_png[0:interHPx-svg_y, 0:interWPx-svg_x]
 
-    intersection = image_processor.find_intersection(plate_size_svg_png, plate)
+    intersection, combined = image_processor.find_intersection(plate_size_svg_png, plate)
 
     inter_rgba = np.dstack((intersection, np.sum(intersection, axis = 2)))
     cv2.imwrite("intersection.png", inter_rgba)
+    cv2.imwrite("combined.png", combined)
 
     img = cv2.imread("intersection.png")[:, :, 2] == 0
     img = img.astype(np.uint8)

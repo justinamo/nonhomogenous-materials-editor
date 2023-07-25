@@ -56,7 +56,10 @@ def find_intersection(svg_png, plate):
     intersection[:, :, 2] = 255  # cv2 saves as bgr image 
     intersection = intersection_inv.reshape((intersection_inv.shape[0], intersection_inv.shape[1], 1)) * intersection
     
-    return intersection
+    combined = np.logical_or(intersection == 255, full == 255)
+    combined = combined * np.ones_like(combined, dtype=int) * 255
+
+    return intersection, combined
 
 if __name__ == "__main__":
     img_path = "../../images/cropartlight2-f.jpg"

@@ -54,8 +54,11 @@ function processIntersectionResponse(response) {
     image.src = url; 
     intersectionData = image; 
 
-    clearCanvas(); 
-    draw();
+    document.getElementById("loading-svg").style.display = "none";
+    image.onload = function(e) {
+      clearCanvas(); 
+      draw();
+    };
   });
 };
 
@@ -77,11 +80,14 @@ function startup() {
     x = event.offsetX - canvasOffset;
     y = event.offsetY - canvasOffset;
     pointerOnSvg = svgData && 
-      ( originOffsetX + svgOffsetX < x && x < originOffsetX + svgOffsetY + svgWidthPx &&
-	originOffsetY + svgOffsetY < y && y < originOffsetY + svgOffsetY + svgHeightPx
+      ((originOffsetX + svgOffsetX) < x && x < (originOffsetX + svgOffsetX + svgWidthPx) &&
+       (originOffsetY + svgOffsetY) < y && y < (originOffsetY + svgOffsetY + svgHeightPx)
       );
     if (pointerOnSvg) {
       console.log("pointer on svg");
+      intersectionData = undefined; 
+      clearCanvas(); 
+      draw();
       svgDragStartX = event.x - svgOffsetX; 
       svgDragStartY = event.y - svgOffsetY; 
       svgDragged = true; 
@@ -99,8 +105,8 @@ function startup() {
   window.addEventListener("mousemove", (event) => {
     event.preventDefault();
     if (viewsizerDragged) { 
-      viewWidth = event.x - 50;
-      viewHeight = event.y - 50;
+      viewWidth = event.offsetX - 50;
+      viewHeight = event.offsetY - 50;
       updateViewSize();
       updateCanvasSize();
       draw(); 
@@ -124,6 +130,7 @@ function startup() {
     };
     viewsizerDragged = false;
     if (svgDragged) {
+      document.getElementById("loading-svg").style.display = "inline";
       getIntersection(); 
       clearCanvas();
       draw(); 
@@ -180,8 +187,8 @@ function startup() {
       svgWidthInInches = width / document.getElementById("vupi-input").value;
       svgHeightInInches = height / document.getElementById("vupi-input").value;
       getIntersection();
+      clearCanvas();
       draw();
-      document.getElementById("loading-svg").style.display = "none";
     }); 
   };
 
@@ -336,7 +343,9 @@ function drawSvg() {
 
 function drawIntersection() { 
   if (canvas.getContext && intersectionData) {
+    console.log("drawing intersection");
     const ctx = canvas.getContext("2d");
+    console.log(intersectionData);
     drawImage(ctx, originOffsetX, originOffsetY, intersectionData, plateWidthInInches, plateHeightInInches);
   };
 };
