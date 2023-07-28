@@ -17,6 +17,8 @@ var svgOffsetY = 0;
 var svgDragStartX = null;
 var svgDragStartY = null; 
 var svgDragged = false; 
+var svgViewBox = null; 
+var newSvgViewBox = null; 
 
 var intersectionData; 
 
@@ -73,6 +75,30 @@ function getIntersection() {
   upload(formData, "intersection", processIntersectionResponse); 
 };
 
+function calcViewBox() { 
+  xIn = svgOffsetX / gridCellSize * inchesPerGridCell;
+  yIn = svgOffsetY / gridCellSize * inchesPerGridCell;
+  offsetXSvgPx = xIn * document.getElementById("vupi-input").value;
+  offsetYSvgPx = yIn * document.getElementById("vupi-input").value;
+  [ x, y, width, height ] = svgViewBox.split(" ").map(parseFloat); 
+  if (offsetXSvgPx > 0) { 
+    width += offsetXSvgPx;
+  } else { 
+    x = offsetXSvgPx; 
+  }; 
+  if (offsetYSvgPx > 0) { 
+    height += offsetYSvgPx; 
+  } else { 
+    y = offsetYSvgPx; 
+  };
+  newSvgViewBox = [ x, y, width, height ].join(" "); 
+  console.log(newSvgViewBox);
+};
+
+function refreshViewBox() { 
+  document.getElementById("viewbox").innerText = "viewBox: " + newSvgViewBox; 
+};
+
 function startup() { 
   view.addEventListener("mousedown", (event) => {
     svgWidthPx = svgWidthInInches / inchesPerGridCell * gridCellSize; 
@@ -115,6 +141,8 @@ function startup() {
       svgOffsetY = event.y - svgDragStartY; 
       clearCanvas();
       draw(); 
+      calcViewBox();
+      refreshViewBox(); 
     } else if (canvasDragged) {
       originOffsetX = event.x - canvasDragStartX;
       originOffsetY = event.y - canvasDragStartY;
@@ -181,7 +209,9 @@ function startup() {
       var svgDoc = parser.parseFromString(text, "image/svg+xml");
       svgData = svgDoc; 
       var viewBox = svgDoc.querySelector("svg").getAttribute("viewBox"); 
-      document.getElementById("viewbox").innerText = "viewBox: " + viewBox; 
+      svgViewBox = viewBox; 
+      newSvgViewBox = viewBox; 
+      refreshViewBox(); 
       var width = viewBox.split(" ")[2];
       var height = viewBox.split(" ")[3];
       svgWidthInInches = width / document.getElementById("vupi-input").value;
