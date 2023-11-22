@@ -8,9 +8,12 @@
   <body>
     <header>
       <div>
+	<div>
 	<span>Upload photo of plate</span>
 	<img src="loading.gif" class="loading" id="loading-plate"/>
-	<input type="file" id="photo-input"></input>
+	<input type="file" id="photo-input">front</input>
+	<input type="file" id="photo-input-back">back</input>
+	</div>
 	<span>plate width in inches:</span>
 	<input type="text" class="text-input" id="width-input"></input>
 	<span>plate height in inches:</span>
@@ -23,6 +26,9 @@
 	<span>viewBox units per inch:</span>
 	<input type="text" class="text-input" id="vupi-input"></input>
 	<div id="viewbox">viewBox: [min-x] [min-y] [width] [height]</div>
+      </div>
+      <div>
+	<a id="download" download>download</a>
       </div>
     </header> 
     <div class="view" id="view">

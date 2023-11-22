@@ -6,6 +6,7 @@ var canvasDragStartX = null;
 var canvasDragStartY = null; 
 
 var plateData; 
+var plateDataBack; 
 var plateWidthInInches;
 var plateHeightInInches; 
 
@@ -81,22 +82,25 @@ function calcViewBox() {
   offsetXSvgPx = xIn * document.getElementById("vupi-input").value;
   offsetYSvgPx = yIn * document.getElementById("vupi-input").value;
   [ x, y, width, height ] = svgViewBox.split(" ").map(parseFloat); 
-  if (offsetXSvgPx > 0) { 
-    width += offsetXSvgPx;
-  } else { 
-    x = offsetXSvgPx; 
-  }; 
-  if (offsetYSvgPx > 0) { 
-    height += offsetYSvgPx; 
-  } else { 
-    y = offsetYSvgPx; 
-  };
-  newSvgViewBox = [ x, y, width, height ].join(" "); 
+  x = -1 * offsetXSvgPx; 
+  y = -1 * offsetYSvgPx; 
+  width += offsetXSvgPx
+  height += offsetYSvgPx
+  newSvgViewBox = [ x, y, width, height ].map((x) => x.toFixed(2)).join(" "); 
   console.log(newSvgViewBox);
 };
 
 function refreshViewBox() { 
   document.getElementById("viewbox").innerText = "viewBox: " + newSvgViewBox; 
+  var svgElement = svgData.querySelector("svg"); 
+  svgElement.setAttribute("viewBox", newSvgViewBox); 
+  [ x, y, width, height ] = newSvgViewBox.split(" ");
+  svgElement.setAttribute("width", width); 
+  svgElement.setAttribute("height", height); 
+  var download = document.getElementById("download");
+  var serializer = new XMLSerializer(); 
+  var svgString = serializer.serializeToString(svgData);
+  download.setAttribute("href", "data:text/svg+xml," + encodeURIComponent(svgString));
 };
 
 function startup() { 
@@ -174,32 +178,43 @@ function startup() {
   updateCanvasSize(); 
   drawGrid(gridCellSize, inchesPerGridCell);
 
-  var plateReader = new FileReader(); 
-  plateReader.addEventListener("load", (event) => {
-    var image = new Image(); 
-    image.src = plateReader.result; 
-    plateData = image; 
-    plateWidthInInches = parseFloat(document.getElementById("width-input").value);
-    plateHeightInInches = parseFloat(document.getElementById("height-input").value);
-    clearCanvas();
-    draw(); 
-  });
+  function createPlateReader(plateDataVariable) { 
+    var plateReader = new FileReader(); 
+    plateReader.addEventListener("load", (event) => {
+      var image = new Image(); 
+      image.src = plateReader.result; 
+      plateDataVariable = image; 
+      plateWidthInInches = parseFloat(document.getElementById("width-input").value);
+      plateHeightInInches = parseFloat(document.getElementById("height-input").value);
+      clearCanvas();
+      draw(); 
+    });
+    return plateReader
+  };
+
+  var plateReader = createPlateReader(plateData); 
+  var plateReaderBack = createPlateReader(plateDataBack); 
 
   function processPlateResponse(response) {
     return response; 
   };
 
-  var photoInput = document.getElementById("photo-input"); 
-  photoInput.addEventListener("change", (event) => {
-    if (photoInput.files && photoInput.files[0]) { 
-      var photo = photoInput.files[0]; 
-      const formData = new FormData(); 
-      formData.append("plate", photo); 
-      var response = upload(formData, "plate", processPlateResponse);
-      plateReader.readAsDataURL(photo);
-    };
-  });
+  function savePlateData(inputElementId, uploadPath, reader) { 
+    var input = document.getElementById(inputElementId); 
+    input.addEventListener("change", (event) => {
+      if (input.files && input.files[0]) { 
+	var photo = input.files[0]; 
+	const formData = new FormData(); 
+	formData.append("plate", photo); 
+	var response = upload(formData, uploadPath, processPlateResponse);
+	plateReader.readAsDataURL(photo);
+      };
+    });
+  };
 
+  savePlateData("photo-input", "plate", plateReader); 
+  savePlateData("photo-input-back", "plate-back", plateReaderBack); 
+  
   var header = document.querySelector("header");
   function processSvgResponse(response) { 
     var blob = response.blob().then((blob) => {
@@ -367,7 +382,7 @@ function drawSvg() {
     });
     ctx.resetTransform(); 
     d = drawImage(ctx, offsetX, offsetY, svgData, svgWidthInInches, svgHeightInInches, false);
-    drawRect(ctx, d.dx, d.dy, d.dWidth, d.dHeight, offsetX, offsetY, "gray", [5]);
+    drawRect(ctx, d.dx, d.dy, d.dWidth, d.dHeight, originOffsetX, originOffsetY, "gray", [5]);
   };
 };
 

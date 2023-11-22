@@ -20,6 +20,21 @@ def plate():
     response.set_header('Access-Control-Allow-Headers', 'access-control-allow-origin')
     return "Hello World!"
 
+@route('/plate-back', method="PUT")
+def plate_back():
+    response.set_header('Access-Control-Allow-Origin', '*')
+    request.files['plate-back'].save("plate_back_raw.jpg", overwrite=True)
+    processed = image_processor.process_plate("plate_back_raw.jpg")
+    cv2.imwrite("plate_back.jpg", processed)
+    return "Hello World!"
+
+@route('/plate-back', method="OPTIONS")
+def plate_back():
+    response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Access-Control-Allow-Methods', 'PUT')
+    response.set_header('Access-Control-Allow-Headers', 'access-control-allow-origin')
+    return "Hello World!"
+
 @route('/svg', method="GET")
 def svg():
     response.set_header('Access-Control-Allow-Origin', '*')
